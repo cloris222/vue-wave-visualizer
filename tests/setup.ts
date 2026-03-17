@@ -68,14 +68,26 @@ class MockAudioContext {
 ;(global as unknown as Record<string, unknown>).AudioContext = MockAudioContext
 ;(global as unknown as Record<string, unknown>).webkitAudioContext = MockAudioContext
 
-// Mock requestAnimationFrame
+// Mock requestAnimationFrame — uses setTimeout (macrotask) so cancelAnimationFrame
+// can actually cancel pending callbacks before they fire.
+const _pendingFrames = new Map<number, ReturnType<typeof setTimeout>>()
 let rafId = 0
 vi.stubGlobal('requestAnimationFrame', (cb: FrameRequestCallback) => {
-  rafId++
-  Promise.resolve().then(() => cb(performance.now()))
-  return rafId
+  const id = ++rafId
+  const timer = setTimeout(() => {
+    _pendingFrames.delete(id)
+    cb(performance.now())
+  }, 0)
+  _pendingFrames.set(id, timer)
+  return id
 })
-vi.stubGlobal('cancelAnimationFrame', (_id: number) => {})
+vi.stubGlobal('cancelAnimationFrame', (id: number) => {
+  const timer = _pendingFrames.get(id)
+  if (timer !== undefined) {
+    clearTimeout(timer)
+    _pendingFrames.delete(id)
+  }
+})
 
 // Mock ResizeObserver
 vi.stubGlobal('ResizeObserver', class {
