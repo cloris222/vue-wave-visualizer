@@ -98,17 +98,17 @@ export function useCanvasRenderer(): UseCanvasRendererReturn {
       const opts = getCanvasOptions(canvas, optionsRef.value)
 
       // Get data
-      let data: Uint8Array
+      let data: Uint8Array<ArrayBuffer>
       if (mode === 'waveform') {
-        data = new Uint8Array(analyser.fftSize)
+        data = new Uint8Array(analyser.fftSize) as Uint8Array<ArrayBuffer>
         analyser.getByteTimeDomainData(data)
       } else {
-        data = new Uint8Array(analyser.frequencyBinCount)
+        data = new Uint8Array(analyser.frequencyBinCount) as Uint8Array<ArrayBuffer>
         analyser.getByteFrequencyData(data)
       }
 
       // Silence detection (always uses time domain RMS)
-      const tdData = new Uint8Array(analyser.fftSize)
+      const tdData = new Uint8Array(analyser.fftSize) as Uint8Array<ArrayBuffer>
       analyser.getByteTimeDomainData(tdData)
       const rms = computeRMS(tdData)
 
