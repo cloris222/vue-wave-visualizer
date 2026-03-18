@@ -15,12 +15,14 @@ export default defineConfig({
     lib: {
       entry: resolve(__dirname, 'src/index.ts'),
       name: 'VueWaveVisualizer',
-      fileName: 'vue-wave-visualizer',
+      fileName: (format) => `vue-wave-visualizer.${format === 'es' ? 'es.js' : 'umd.cjs'}`,
+      formats: ['es', 'umd'],
     },
     rollupOptions: {
       external: ['vue'],
       output: {
         globals: { vue: 'Vue' },
+        exports: 'named',
       },
     },
   },
