@@ -107,9 +107,15 @@ export function useCanvasRenderer(): UseCanvasRendererReturn {
         analyser.getByteFrequencyData(data)
       }
 
-      // Silence detection (always uses time domain RMS)
-      const tdData = new Uint8Array(analyser.fftSize) as Uint8Array<ArrayBuffer>
-      analyser.getByteTimeDomainData(tdData)
+      // Silence detection always uses time domain RMS.
+      // In waveform mode, `data` is already time-domain — reuse it to avoid a second read.
+      let tdData: Uint8Array<ArrayBuffer>
+      if (mode === 'waveform') {
+        tdData = data
+      } else {
+        tdData = new Uint8Array(analyser.fftSize) as Uint8Array<ArrayBuffer>
+        analyser.getByteTimeDomainData(tdData)
+      }
       const rms = computeRMS(tdData)
 
       if (rms < silenceThreshold) {

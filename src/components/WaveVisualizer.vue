@@ -79,7 +79,13 @@ function startPipeline(stream: MediaStream) {
       emit('error', payload)
     },
   })
-  if (analyser.value) {
+  // Guard: only start if analyser was created AND the stream track is still active.
+  // init() sets analyser.value before attachTrackListener runs, so if the track was
+  // already ended, onStreamEnd fired synchronously (calling stop()), but analyser.value
+  // is still non-null. Re-checking the track state here avoids a stale RAF loop.
+  const tracks = stream.getAudioTracks()
+  const trackAlive = tracks.length > 0 && tracks[0].readyState !== 'ended'
+  if (analyser.value && trackAlive) {
     start(canvasRef, analyser, modeRef, rendererOptions, {
       silenceThreshold: validated.value.silenceThreshold,
       silenceDuration: validated.value.silenceDuration,
@@ -120,6 +126,11 @@ onUnmounted(() => {
   stop()
   resizeObserver.value?.disconnect()
   cleanupAudio()
+})
+
+watch(() => validated.value.height, () => {
+  updateCanvasSize()
+  renderCalmState(canvasRef, modeRef, rendererOptions)
 })
 
 watch(() => props.stream, (newStream) => {
