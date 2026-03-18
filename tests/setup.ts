@@ -65,8 +65,8 @@ class MockAudioContext {
 }
 
 // Install mocks globally
-;(global as unknown as Record<string, unknown>).AudioContext = MockAudioContext
-;(global as unknown as Record<string, unknown>).webkitAudioContext = MockAudioContext
+;(globalThis as unknown as Record<string, unknown>).AudioContext = MockAudioContext
+;(globalThis as unknown as Record<string, unknown>).webkitAudioContext = MockAudioContext
 
 // Mock requestAnimationFrame — uses setTimeout (macrotask) so cancelAnimationFrame
 // can actually cancel pending callbacks before they fire.

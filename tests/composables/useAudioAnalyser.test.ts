@@ -32,23 +32,23 @@ describe('useAudioAnalyser', () => {
 
   it('emits error if AudioContext is not supported', () => {
     const onError = vi.fn()
-    const original = (global as unknown as Record<string, unknown>).AudioContext
-    delete (global as unknown as Record<string, unknown>).AudioContext
-    delete (global as unknown as Record<string, unknown>).webkitAudioContext
+    const original = (globalThis as unknown as Record<string, unknown>).AudioContext
+    delete (globalThis as unknown as Record<string, unknown>).AudioContext
+    delete (globalThis as unknown as Record<string, unknown>).webkitAudioContext
 
     const { init } = useAudioAnalyser()
     init(makeStream(), 2048, 0.8, { onError })
     expect(onError).toHaveBeenCalledWith(expect.objectContaining({ code: 'UNSUPPORTED' }))
 
-    ;(global as unknown as Record<string, unknown>).AudioContext = original
-    ;(global as unknown as Record<string, unknown>).webkitAudioContext = original
+    ;(globalThis as unknown as Record<string, unknown>).AudioContext = original
+    ;(globalThis as unknown as Record<string, unknown>).webkitAudioContext = original
   })
 
   it('cleanup closes the AudioContext', async () => {
     const { init, cleanup } = useAudioAnalyser()
     init(makeStream(), 2048, 0.8)
     const closeSpy = vi.spyOn(
-      (global as unknown as { AudioContext: { prototype: { close: () => void } } })
+      (globalThis as unknown as { AudioContext: { prototype: { close: () => void } } })
         .AudioContext.prototype,
       'close'
     )
