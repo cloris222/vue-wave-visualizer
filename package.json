@@ -11,8 +11,11 @@
       "require": "./dist/vue-wave-visualizer.umd.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
+    "dev": "vite",
     "build": "vite build && vue-tsc --declaration --emitDeclarationOnly --outDir dist",
     "test": "vitest run",
     "test:watch": "vitest",
