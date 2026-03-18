@@ -1,6 +1,15 @@
 {
   "name": "vue-wave-visualizer",
   "version": "0.1.0",
+  "description": "A Vue 3 component for real-time audio waveform visualization from MediaStream using Web Audio API",
+  "keywords": ["vue", "vue3", "audio", "waveform", "visualizer", "mediastream", "web-audio", "canvas"],
+  "author": "cloris222",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloris222/vue-wave-visualizer.git"
+  },
+  "homepage": "https://cloris222.github.io/vue-wave-visualizer/",
   "type": "module",
   "main": "./dist/vue-wave-visualizer.umd.cjs",
   "module": "./dist/vue-wave-visualizer.es.js",
