@@ -1,7 +1,11 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import WaveVisualizer from '../src/components/WaveVisualizer.vue'
+import LangSwitcher from './components/LangSwitcher.vue'
+import { useLocale } from './i18n'
 import type { WaveMode } from '../src/types'
+
+const { t } = useLocale()
 
 // ── types ──────────────────────────────────────────────────
 interface Cfg {
@@ -88,8 +92,8 @@ function stopMic() {
 <\/script>
 
 <template>
-  <button @click="startMic">開啟麥克風</button>
-  <button @click="stopMic">停止</button>
+  <button @click="startMic">${t('micBtnInCode')}</button>
+  <button @click="stopMic">${t('stopBtnInCode')}</button>
 
   <WaveVisualizer
     :stream="stream"
@@ -139,13 +143,13 @@ async function toggleMic() {
       stream.value = await navigator.mediaDevices.getUserMedia({ audio: true })
       isRecording.value = true
     } catch (e) {
-      micError.value = '無法存取麥克風：' + (e instanceof Error ? e.message : String(e))
+      micError.value = t('micError') + (e instanceof Error ? e.message : String(e))
     }
   }
 }
 
 function onSilence(payload: { duration: number }) {
-  silenceMsg.value = `偵測到靜音 (${(payload.duration / 1000).toFixed(1)}s)`
+  silenceMsg.value = t('silenceDetected') + ' (' + (payload.duration / 1000).toFixed(1) + 's)'
 }
 function onAudioActive() { silenceMsg.value = null }
 function onStreamEnd()   { isRecording.value = false; stream.value = null }
@@ -153,16 +157,19 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
 
 <template>
   <div class="container">
-    <h1>vue-wave-visualizer demo</h1>
+    <div class="title-row">
+      <h1>vue-wave-visualizer demo</h1>
+      <LangSwitcher />
+    </div>
 
     <!-- toolbar -->
     <div class="toolbar">
       <div class="toolbar-top">
         <button :class="['btn', isRecording ? 'btn-danger' : '']" @click="toggleMic">
-          {{ isRecording ? '⏹ 停止麥克風' : '🎤 開啟麥克風' }}
+          {{ isRecording ? t('stopMic') : t('startMic') }}
         </button>
         <div class="toolbar-right">
-          <button :class="['btn', panelOpen ? 'btn-selected' : '']" @click="openPanel">⚙ 設定</button>
+          <button :class="['btn', panelOpen ? 'btn-selected' : '']" @click="openPanel">{{ t('settings') }}</button>
         </div>
       </div>
       <div class="toolbar-modes">
@@ -198,11 +205,11 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
     </div>
 
     <!--quick start-->
-    <button class="btn" @click="openCodeDialog">&lt;/&gt; 程式碼</button>
+    <button class="btn" @click="openCodeDialog">{{ t('code') }}</button>
 
     <div class="info">
-      <span>狀態：<strong>{{ isRecording ? '錄音中' : '待機' }}</strong></span>
-      <span>模式：<strong>{{ mode }}</strong></span>
+      <span>{{ t('status') }}：<strong>{{ isRecording ? t('recording') : t('idle') }}</strong></span>
+      <span>{{ t('mode') }}：<strong>{{ mode }}</strong></span>
     </div>
   </div>
 
@@ -210,16 +217,16 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
   <Transition name="panel">
     <div v-if="panelOpen" class="side-panel">
       <div class="panel-header">
-        <h2>設定 <span v-if="hasUnsaved" class="unsaved-dot" title="有未儲存的變更">●</span></h2>
-        <button class="icon-btn" @click="closePanel" title="關閉（放棄變更）">✕</button>
+        <h2>{{ t('settings') }} <span v-if="hasUnsaved" class="unsaved-dot" :title="t('unsavedDot')">●</span></h2>
+        <button class="icon-btn" @click="closePanel" :title="t('closePanel')">✕</button>
       </div>
 
       <div class="panel-body">
         <section>
-          <h4>通用設定</h4>
+          <h4>{{ t('generalSettings') }}</h4>
 
           <label class="field">
-            <span>高度 (height)</span>
+            <span>{{ t('height') }}</span>
             <div class="input-row">
               <input type="range"  v-model.number="workCfg.height" min="40" max="400" step="10" />
               <input type="number" v-model.number="workCfg.height" min="40" max="400" step="10" class="num-input" />
@@ -227,7 +234,7 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
           </label>
 
           <label class="field">
-            <span>波形顏色 (color)</span>
+            <span>{{ t('color') }}</span>
             <div class="input-row">
               <input type="color" v-model="workCfg.color" class="color-input" />
               <input type="text"  v-model="workCfg.color" class="text-input" placeholder="#58a6ff" />
@@ -235,7 +242,7 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
           </label>
 
           <label class="field">
-            <span>背景顏色 (backgroundColor)</span>
+            <span>{{ t('bgColor') }}</span>
             <div class="input-row">
               <input type="color" v-model="workCfg.backgroundColor" class="color-input" :disabled="workCfg.useTransparentBg" />
               <input type="text"  v-model="workCfg.backgroundColor" class="text-input"  :disabled="workCfg.useTransparentBg" placeholder="#0d1117" />
@@ -247,7 +254,7 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
           </label>
 
           <label class="field">
-            <span>靜音閾值 (silenceThreshold) — {{ workCfg.silenceThreshold.toFixed(3) }}</span>
+            <span>{{ t('silenceThreshold') }} — {{ workCfg.silenceThreshold.toFixed(3) }}</span>
             <div class="input-row">
               <input type="range"  v-model.number="workCfg.silenceThreshold" min="0" max="0.5" step="0.005" />
               <input type="number" v-model.number="workCfg.silenceThreshold" min="0" max="0.5" step="0.005" class="num-input" />
@@ -255,7 +262,7 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
           </label>
 
           <label class="field">
-            <span>靜音時長 (silenceDuration) ms</span>
+            <span>{{ t('silenceDuration') }}</span>
             <div class="input-row">
               <input type="range"  v-model.number="workCfg.silenceDuration" min="100" max="5000" step="100" />
               <input type="number" v-model.number="workCfg.silenceDuration" min="100" max="5000" step="100" class="num-input" />
@@ -264,10 +271,10 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
         </section>
 
         <section>
-          <h4>模式設定 <span class="mode-tag">{{ mode }}</span></h4>
+          <h4>{{ t('modeSettings') }} <span class="mode-tag">{{ mode }}</span></h4>
 
           <label v-if="showBarCount" class="field">
-            <span>Bar 數量 (barCount)</span>
+            <span>{{ t('barCount') }}</span>
             <div class="input-row">
               <input type="range"  v-model.number="workCfg.barCount" min="4" max="256" step="1" />
               <input type="number" v-model.number="workCfg.barCount" min="4" max="256" step="1" class="num-input" />
@@ -275,7 +282,7 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
           </label>
 
           <label v-if="showLineWidth" class="field">
-            <span>線條寬度 (lineWidth)</span>
+            <span>{{ t('lineWidth') }}</span>
             <div class="input-row">
               <input type="range"  v-model.number="workCfg.lineWidth" min="1" max="10" step="0.5" />
               <input type="number" v-model.number="workCfg.lineWidth" min="1" max="10" step="0.5" class="num-input" />
@@ -283,14 +290,14 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
           </label>
 
           <label class="field">
-            <span>FFT 大小 (fftSize)</span>
+            <span>{{ t('fftSize') }}</span>
             <select v-model.number="workCfg.fftSize" class="select-input">
               <option v-for="s in fftSizeOptions" :key="s" :value="s">{{ s }}</option>
             </select>
           </label>
 
           <label class="field">
-            <span>平滑係數 (smoothingTimeConstant) — {{ workCfg.smoothingTimeConstant.toFixed(2) }}</span>
+            <span>{{ t('smoothing') }} — {{ workCfg.smoothingTimeConstant.toFixed(2) }}</span>
             <div class="input-row">
               <input type="range"  v-model.number="workCfg.smoothingTimeConstant" min="0" max="1" step="0.01" />
               <input type="number" v-model.number="workCfg.smoothingTimeConstant" min="0" max="1" step="0.01" class="num-input" />
@@ -300,8 +307,8 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
       </div>
 
       <div class="panel-footer">
-        <button class="footer-btn footer-btn-reset" @click="resetWork" :disabled="!hasUnsaved">重設</button>
-        <button class="footer-btn footer-btn-save"  @click="savePanel" :disabled="!hasUnsaved">儲存</button>
+        <button class="footer-btn footer-btn-reset" @click="resetWork" :disabled="!hasUnsaved">{{ t('reset') }}</button>
+        <button class="footer-btn footer-btn-save"  @click="savePanel" :disabled="!hasUnsaved">{{ t('save') }}</button>
       </div>
     </div>
   </Transition>
@@ -310,22 +317,22 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
   <dialog ref="codeDialogRef" class="code-dialog" @click="onCodeBackdrop">
     <div class="code-dialog-inner">
       <div class="code-dialog-header">
-        <h2>&lt;/&gt; 快速使用指南</h2>
+        <h2>&lt;/&gt; {{ t('quickStart') }}</h2>
         <button class="icon-btn" @click="closeCodeDialog">✕</button>
       </div>
 
       <div class="code-dialog-body">
-        <p class="code-tip">依照以下步驟將 WaveVisualizer 嵌入你的 Vue 3 專案。<br>程式碼已反映目前儲存的設定（模式：<strong>{{ mode }}</strong>）。</p>
+        <p class="code-tip">{{ t('codeTipLine1') }}<br>{{ t('codeTipLine2').replace('{mode}', mode) }}</p>
 
         <!-- Step 1: install -->
         <div class="code-section">
           <div class="code-section-label">
-            <span class="step-badge">1</span> 安裝套件
+            <span class="step-badge">1</span> {{ t('installPkg') }}
           </div>
           <div class="code-block-wrap">
             <pre class="code-block">{{ installCode }}</pre>
             <button class="copy-btn" @click="copy(installCode, 'install')">
-              {{ copiedInstall ? '✓ 已複製' : '複製' }}
+              {{ copiedInstall ? t('copied') : t('copy') }}
             </button>
           </div>
         </div>
@@ -333,12 +340,12 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
         <!-- Step 2: usage -->
         <div class="code-section">
           <div class="code-section-label">
-            <span class="step-badge">2</span> 貼入你的元件
+            <span class="step-badge">2</span> {{ t('pasteComponent') }}
           </div>
           <div class="code-block-wrap">
             <pre class="code-block">{{ usageCode }}</pre>
             <button class="copy-btn" @click="copy(usageCode, 'usage')">
-              {{ copiedUsage ? '✓ 已複製' : '複製' }}
+              {{ copiedUsage ? t('copied') : t('copy') }}
             </button>
           </div>
         </div>
@@ -368,6 +375,12 @@ body {
   gap: 20px;
 }
 
+.title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
 h1 { font-size: 1.5rem; color: #58a6ff; }
 
 /* ── toolbar ── */
@@ -382,7 +395,7 @@ h1 { font-size: 1.5rem; color: #58a6ff; }
 
 .toolbar-right { display: flex; gap: 8px; }
 
-.toolbar-modes { 
+.toolbar-modes {
   margin-top: 1rem;
   display: flex; gap: 8px;
  }

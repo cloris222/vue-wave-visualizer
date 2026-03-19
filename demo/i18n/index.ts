@@ -3,7 +3,7 @@ import zhTW from './zh-TW'
 import en from './en'
 
 export type Locale = 'zh-TW' | 'en'
-export type Messages = typeof zhTW
+export type Messages = Record<keyof typeof zhTW, string>
 
 // module-level ref：全 app 共享同一個語言狀態
 const locale = ref<Locale>('zh-TW')
