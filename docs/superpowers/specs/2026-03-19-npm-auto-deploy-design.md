@@ -65,8 +65,12 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
-  id-token: write
+  contents: write      # 建立 GitHub Release 及 git tag
+  id-token: write      # 預留 npm provenance 擴充用
+
+concurrency:
+  group: release
+  cancel-in-progress: false   # 不取消進行中的發布，避免 npm 發到一半
 
 jobs:
   release:
@@ -125,6 +129,15 @@ jobs:
 |---|---|
 | `NPM_TOKEN` | npm Automation Token，需手動在 repo Settings → Secrets 設定 |
 | `GITHUB_TOKEN` | GitHub Actions 自動提供，無需手動設定 |
+
+---
+
+## 注意事項
+
+- **`package.json` 的 `version` 欄位**：semantic-release 透過 `@semantic-release/npm` 在發布時更新此欄位，但不會 commit 回 git（未裝 `@semantic-release/git`）。開發者不需手動修改版本號。
+- **`dist/` 目錄**：`npm run build` 在 `npx semantic-release` 之前執行，確保發布時 `dist/` 已在磁碟上。`dist/` 不進 git，但會被 `npm publish` 打包（由 `package.json` 的 `files: ["dist"]` 控制）。
+- **無版本 commit 回推**：由於未裝 `@semantic-release/git`，semantic-release 只會建立 git tag 和 GitHub Release，不會 push 任何 commit 回 `main`，因此不會觸發第二次 workflow。
+- **`concurrency` 設定**：`cancel-in-progress: false` 確保即使多個 push 接連進來，不會中途取消正在進行的發布流程。
 
 ---
 
