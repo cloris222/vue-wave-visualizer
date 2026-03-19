@@ -16,7 +16,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/cloris222/vue-wave-visualizer.git"
+    "url": "git+https://github.com/cloris222/vue-wave-visualizer.git"
   },
   "homepage": "https://cloris222.github.io/vue-wave-visualizer/",
   "type": "module",
