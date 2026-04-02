@@ -1,5 +1,6 @@
 // src/renderers/drawBars.ts
 import type { RendererOptions } from '@/types'
+import { clearCanvas } from './clearCanvas'
 
 export function drawBars(
   ctx: CanvasRenderingContext2D,
@@ -9,11 +10,8 @@ export function drawBars(
   const { color, backgroundColor, barCount, width, height } = options
   const count = Math.min(barCount, data.length)
 
-  ctx.clearRect(0, 0, width, height)
-  if (backgroundColor !== 'transparent') {
-    ctx.fillStyle = backgroundColor
-    ctx.fillRect(0, 0, width, height)
-  }
+  ctx.save()
+  clearCanvas(ctx, width, height, backgroundColor)
 
   const barWidth = width / count
   ctx.fillStyle = color
@@ -24,4 +22,5 @@ export function drawBars(
     const y = height - barHeight
     ctx.fillRect(x, y, barWidth - 1, barHeight)
   }
+  ctx.restore()
 }

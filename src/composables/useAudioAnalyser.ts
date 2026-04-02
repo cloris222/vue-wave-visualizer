@@ -92,20 +92,21 @@ export function useAudioAnalyser(): UseAudioAnalyserReturn {
     detachTrackListener()
     sourceNode?.disconnect()
     if (ctx && analyser.value) {
+      ctx.resume().catch(() => {})
       sourceNode = ctx.createMediaStreamSource(stream)
       sourceNode.connect(analyser.value)
     }
     attachTrackListener(stream)
   }
 
-  async function cleanup() {
+  function cleanup() {
     detachTrackListener()
     sourceNode?.disconnect()
     sourceNode = null
     analyser.value?.disconnect()
     analyser.value = null
     if (ctx) {
-      await ctx.close()
+      ctx.close().catch(() => {})
       ctx = null
     }
   }

@@ -66,16 +66,25 @@ function updateCanvasSize() {
   canvas.style.height = `${validated.value.height}px`
 }
 
+function startRenderer() {
+  start(canvasRef, analyser, modeRef, rendererOptions, {
+    silenceThreshold: validated.value.silenceThreshold,
+    silenceDuration: validated.value.silenceDuration,
+    onSilence: (payload) => emit('silence', payload),
+    onAudioActive: () => emit('audio-active'),
+  })
+}
+
 function startPipeline(stream: MediaStream) {
   stop()
   init(stream, validated.value.fftSize, validated.value.smoothingTimeConstant, {
     onStreamEnd: () => {
       stop()
-      renderCalmState(canvasRef, modeRef, rendererOptions)
+      renderCalmState(canvasRef, modeRef, rendererOptions, analyser)
       emit('stream-end')
     },
     onError: (payload) => {
-      renderCalmState(canvasRef, modeRef, rendererOptions)
+      renderCalmState(canvasRef, modeRef, rendererOptions, analyser)
       emit('error', payload)
     },
   })
@@ -86,12 +95,7 @@ function startPipeline(stream: MediaStream) {
   const tracks = stream.getAudioTracks()
   const trackAlive = tracks.length > 0 && tracks[0].readyState !== 'ended'
   if (analyser.value && trackAlive) {
-    start(canvasRef, analyser, modeRef, rendererOptions, {
-      silenceThreshold: validated.value.silenceThreshold,
-      silenceDuration: validated.value.silenceDuration,
-      onSilence: (payload) => emit('silence', payload),
-      onAudioActive: () => emit('audio-active'),
-    })
+    startRenderer()
   }
 }
 
@@ -102,12 +106,7 @@ onMounted(() => {
     stop()
     updateCanvasSize()
     if (props.stream && analyser.value) {
-      start(canvasRef, analyser, modeRef, rendererOptions, {
-        silenceThreshold: validated.value.silenceThreshold,
-        silenceDuration: validated.value.silenceDuration,
-        onSilence: (payload) => emit('silence', payload),
-        onAudioActive: () => emit('audio-active'),
-      })
+      startRenderer()
     }
   })
 
@@ -130,23 +129,18 @@ onUnmounted(() => {
 
 watch(() => validated.value.height, () => {
   updateCanvasSize()
-  renderCalmState(canvasRef, modeRef, rendererOptions)
+  renderCalmState(canvasRef, modeRef, rendererOptions, analyser)
 })
 
 watch(() => props.stream, (newStream) => {
   stop()
   if (!newStream) {
-    renderCalmState(canvasRef, modeRef, rendererOptions)
+    renderCalmState(canvasRef, modeRef, rendererOptions, analyser)
     return
   }
   if (analyser.value) {
     reconnect(newStream)
-    start(canvasRef, analyser, modeRef, rendererOptions, {
-      silenceThreshold: validated.value.silenceThreshold,
-      silenceDuration: validated.value.silenceDuration,
-      onSilence: (payload) => emit('silence', payload),
-      onAudioActive: () => emit('audio-active'),
-    })
+    startRenderer()
   } else {
     startPipeline(newStream)
   }

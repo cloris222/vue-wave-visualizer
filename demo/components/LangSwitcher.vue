@@ -4,6 +4,7 @@ import { useLocale, type Locale } from '../i18n'
 
 const { locale, setLocale } = useLocale()
 const open = ref(false)
+const containerRef = ref<HTMLElement | null>(null)
 
 const langs: { code: Locale; label: string }[] = [
   { code: 'zh-TW', label: '繁體中文' },
@@ -22,7 +23,7 @@ function onKeydown(e: KeyboardEvent) {
 }
 
 function onClickOutside(e: MouseEvent) {
-  if (!(e.target as Element).closest('.lang-switcher')) {
+  if (open.value && containerRef.value && !containerRef.value.contains(e.target as Node)) {
     open.value = false
   }
 }
@@ -39,7 +40,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <div class="lang-switcher">
+  <div ref="containerRef" class="lang-switcher">
     <button
       class="lang-btn"
       data-testid="lang-btn"

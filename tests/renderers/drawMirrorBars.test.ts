@@ -7,6 +7,8 @@ function makeCtx() {
   return {
     clearRect: vi.fn(),
     fillRect: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
     fillStyle: '',
   } as unknown as CanvasRenderingContext2D
 }

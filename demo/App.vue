@@ -115,7 +115,11 @@ function stopMic() {
 })
 
 async function copy(text: string, which: 'install' | 'usage') {
-  await navigator.clipboard.writeText(text)
+  try {
+    await navigator.clipboard.writeText(text)
+  } catch {
+    return
+  }
   if (which === 'install') {
     copiedInstall.value = true
     setTimeout(() => { copiedInstall.value = false }, 2000)
@@ -322,7 +326,7 @@ function onStreamEnd()   { isRecording.value = false; stream.value = null }
       </div>
 
       <div class="code-dialog-body">
-        <p class="code-tip">{{ t('codeTipLine1') }}<br>{{ t('codeTipLine2').replace('{mode}', mode) }}</p>
+        <p class="code-tip">{{ t('codeTipLine1') }}<br>{{ t('codeTipLine2', { mode }) }}</p>
 
         <!-- Step 1: install -->
         <div class="code-section">

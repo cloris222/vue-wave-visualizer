@@ -25,7 +25,8 @@ interface UseCanvasRendererReturn {
   renderCalmState: (
     canvasRef: Ref<HTMLCanvasElement | null>,
     modeRef: Ref<WaveMode>,
-    optionsRef: Ref<RendererOptions>
+    optionsRef: Ref<RendererOptions>,
+    analyserRef?: Ref<AnalyserNode | null>
   ) => void
 }
 
@@ -138,6 +139,10 @@ export function useCanvasRenderer(): UseCanvasRendererReturn {
       rafId = requestAnimationFrame(loop)
     }
 
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId)
+      rafId = null
+    }
     rafId = requestAnimationFrame(loop)
   }
 
@@ -155,14 +160,16 @@ export function useCanvasRenderer(): UseCanvasRendererReturn {
     canvasRef: Ref<HTMLCanvasElement | null>,
     modeRef: Ref<WaveMode>,
     optionsRef: Ref<RendererOptions>,
+    analyserRef?: Ref<AnalyserNode | null>,
   ) {
     const canvas = canvasRef.value
     if (!canvas) return
     const ctx = canvas.getContext('2d')
     if (!ctx) return
     const opts = getCanvasOptions(canvas, optionsRef.value)
+    const fftSize = analyserRef?.value?.fftSize ?? 2048
     const zeros = new Uint8Array(
-      modeRef.value === 'waveform' ? 2048 : opts.barCount
+      modeRef.value === 'waveform' ? fftSize : opts.barCount
     ).fill(modeRef.value === 'waveform' ? 128 : 0)
     draw(ctx, zeros, modeRef.value, opts)
   }

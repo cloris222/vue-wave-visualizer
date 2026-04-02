@@ -1,5 +1,6 @@
 // src/renderers/drawCircular.ts
 import type { RendererOptions } from '@/types'
+import { clearCanvas } from './clearCanvas'
 
 export function drawCircular(
   ctx: CanvasRenderingContext2D,
@@ -13,11 +14,8 @@ export function drawCircular(
   const baseRadius = Math.min(cx, cy) * 0.35
   const maxBarLength = Math.min(cx, cy) * 0.55
 
-  ctx.clearRect(0, 0, width, height)
-  if (backgroundColor !== 'transparent') {
-    ctx.fillStyle = backgroundColor
-    ctx.fillRect(0, 0, width, height)
-  }
+  ctx.save()
+  clearCanvas(ctx, width, height, backgroundColor)
 
   ctx.strokeStyle = color
   ctx.lineWidth = lineWidth
@@ -25,14 +23,17 @@ export function drawCircular(
   for (let i = 0; i < count; i++) {
     const angle = (i / count) * Math.PI * 2 - Math.PI / 2
     const barLength = Math.max(2, (data[i] / 255) * maxBarLength)
-    const x1 = cx + Math.cos(angle) * baseRadius
-    const y1 = cy + Math.sin(angle) * baseRadius
-    const x2 = cx + Math.cos(angle) * (baseRadius + barLength)
-    const y2 = cy + Math.sin(angle) * (baseRadius + barLength)
+    const cosA = Math.cos(angle)
+    const sinA = Math.sin(angle)
+    const x1 = cx + cosA * baseRadius
+    const y1 = cy + sinA * baseRadius
+    const x2 = cx + cosA * (baseRadius + barLength)
+    const y2 = cy + sinA * (baseRadius + barLength)
 
     ctx.beginPath()
     ctx.moveTo(x1, y1)
     ctx.lineTo(x2, y2)
     ctx.stroke()
   }
+  ctx.restore()
 }

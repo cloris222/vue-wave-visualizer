@@ -1,5 +1,6 @@
 // src/renderers/drawMirrorBars.ts
 import type { RendererOptions } from '@/types'
+import { clearCanvas } from './clearCanvas'
 
 export function drawMirrorBars(
   ctx: CanvasRenderingContext2D,
@@ -10,11 +11,8 @@ export function drawMirrorBars(
   const count = Math.min(barCount, data.length)
   const centerY = height / 2
 
-  ctx.clearRect(0, 0, width, height)
-  if (backgroundColor !== 'transparent') {
-    ctx.fillStyle = backgroundColor
-    ctx.fillRect(0, 0, width, height)
-  }
+  ctx.save()
+  clearCanvas(ctx, width, height, backgroundColor)
 
   const barWidth = width / count
   ctx.fillStyle = color
@@ -24,4 +22,5 @@ export function drawMirrorBars(
     const x = i * barWidth
     ctx.fillRect(x, centerY - halfHeight, barWidth - 1, halfHeight * 2)
   }
+  ctx.restore()
 }

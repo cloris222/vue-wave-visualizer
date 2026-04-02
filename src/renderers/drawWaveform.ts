@@ -1,5 +1,6 @@
 // src/renderers/drawWaveform.ts
 import type { RendererOptions } from '@/types'
+import { clearCanvas } from './clearCanvas'
 
 export function drawWaveform(
   ctx: CanvasRenderingContext2D,
@@ -8,11 +9,8 @@ export function drawWaveform(
 ): void {
   const { color, backgroundColor, lineWidth, width, height } = options
 
-  ctx.clearRect(0, 0, width, height)
-  if (backgroundColor !== 'transparent') {
-    ctx.fillStyle = backgroundColor
-    ctx.fillRect(0, 0, width, height)
-  }
+  ctx.save()
+  clearCanvas(ctx, width, height, backgroundColor)
 
   ctx.strokeStyle = color
   ctx.lineWidth = lineWidth
@@ -22,8 +20,8 @@ export function drawWaveform(
   let x = 0
 
   for (let i = 0; i < data.length; i++) {
-    const v = data[i] / 128.0
-    const y = (v * height) / 2
+    const v = data[i] / 128.0 - 1.0
+    const y = (v * height) / 2 + height / 2
 
     if (i === 0) {
       ctx.moveTo(x, y)
@@ -35,4 +33,5 @@ export function drawWaveform(
 
   ctx.lineTo(width, height / 2)
   ctx.stroke()
+  ctx.restore()
 }

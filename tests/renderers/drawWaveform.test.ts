@@ -11,6 +11,8 @@ function makeCtx() {
     moveTo: vi.fn(),
     lineTo: vi.fn(),
     stroke: vi.fn(),
+    save: vi.fn(),
+    restore: vi.fn(),
     strokeStyle: '',
     lineWidth: 0,
     fillStyle: '',

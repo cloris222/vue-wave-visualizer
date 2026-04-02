@@ -3,14 +3,23 @@ import zhTW from './zh-TW'
 import en from './en'
 
 export type Locale = 'zh-TW' | 'en'
-export type Messages = Record<keyof typeof zhTW, string>
+export type Messages = Record<keyof typeof zhTW | keyof typeof en, string>
 
-// module-level ref：全 app 共享同一個語言狀態
 const locale = ref<Locale>('zh-TW')
 const messages: Record<Locale, Messages> = { 'zh-TW': zhTW, en }
 
+function t(key: keyof Messages, vars?: Record<string, string>): string {
+  let str: string = messages[locale.value][key]
+  if (vars) {
+    for (const [k, v] of Object.entries(vars)) {
+      str = str.replace(`{${k}}`, v)
+    }
+  }
+  return str
+}
+
+function setLocale(lang: Locale) { locale.value = lang }
+
 export function useLocale() {
-  const t = (key: keyof Messages): string => messages[locale.value][key]
-  const setLocale = (lang: Locale) => { locale.value = lang }
   return { locale, t, setLocale }
 }
